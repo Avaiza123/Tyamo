@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'Views/Auth/login.dart';
+import 'views/auth/login.dart';
+import 'views/home_screen.dart';
 
 void main() {
   runApp(const Tyamo());
@@ -11,11 +11,13 @@ class Tyamo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Tyamo',
-      home: Login(),
+      title: 'Tyamo Recipes',
+      theme: ThemeData(
+        primarySwatch: Colors.orange,
+      ),
+      home: const HomeScreen(),
     );
   }
 }
-
