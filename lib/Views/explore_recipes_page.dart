@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'auth/login.dart'; // Import the LoginPage
+import 'auth/login.dart';
 import 'RecipeDetailPage.dart';
 
 class ExploreRecipesPage extends StatefulWidget {
@@ -16,9 +16,30 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
   List<dynamic> recipes = [];
   List<dynamic> filteredRecipes = [];
   bool isLoading = true;
-  bool isFetchingMore = false;  // To handle infinite scrolling
+  bool isFetchingMore = false;
   int page = 1;
   TextEditingController searchController = TextEditingController();
+  String selectedCategory = 'All';
+
+  final List<String> categories = [
+    'All',
+    'Sweet Snacks',
+    'Main Course',
+    'Breakfast',
+    'Salads',
+    'Vegan',
+    'Chicken'
+  ];
+
+  final Map<String, String> categoryMapping = {
+    'All': '',
+    'Sweet Snacks': 'dessert',
+    'Main Course': 'main_course',
+    'Breakfast': 'breakfast',
+    'Salads': 'salad',
+    'Vegan': 'vegan',
+    'Chicken': 'chicken',
+  };
 
   @override
   void initState() {
@@ -26,17 +47,32 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
     fetchRecipes();
   }
 
-  // Function to fetch popular recipes from an API
-  Future<void> fetchRecipes() async {
-    final url = 'https://api.spoonacular.com/recipes/random?number=10&apiKey=dce8d048d70445279c7b81ff5a99708e'; // Replace with your API key
+  Future<void> fetchRecipes({bool isLoadMore = false}) async {
+    setState(() {
+      if (isLoadMore) {
+        isFetchingMore = true;
+      } else {
+        isLoading = true;
+      }
+    });
+
+    final categoryTag = categoryMapping[selectedCategory] ?? '';
+    final url =
+        'https://api.spoonacular.com/recipes/random?number=10&tags=$categoryTag&apiKey=dce8d048d70445279c7b81ff5a99708e';
+
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          recipes.addAll(data['recipes']);
+          if (isLoadMore) {
+            recipes.addAll(data['recipes']);
+          } else {
+            recipes = data['recipes'];
+          }
           filteredRecipes = recipes;
           isLoading = false;
+          isFetchingMore = false;
         });
       } else {
         throw Exception('Failed to load recipes');
@@ -44,12 +80,12 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
     } catch (e) {
       setState(() {
         isLoading = false;
+        isFetchingMore = false;
       });
       print(e.toString());
     }
   }
 
-  // Search function to filter recipes by name or ingredient
   void searchRecipes(String query) {
     final filtered = recipes.where((recipe) {
       final name = recipe['title'].toLowerCase();
@@ -66,24 +102,17 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
     });
   }
 
-  // Function to handle loading more recipes when scrolling
   void loadMoreRecipes() {
     if (!isFetchingMore) {
-      setState(() {
-        isFetchingMore = true;
-      });
-      page++;
-      fetchRecipes();
-      setState(() {
-        isFetchingMore = false;
-      });
+      page += 1;
+      fetchRecipes(isLoadMore: true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF8D6E63),  // Set background color to light brown
+      backgroundColor: Color(0xFF6D4C41),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -108,10 +137,9 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
             padding: const EdgeInsets.only(right: 10),
             child: TextButton(
               onPressed: () {
-                // Navigate to the LoginPage
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => Login()), // Navigate to LoginPage
+                  MaterialPageRoute(builder: (context) => Login()),
                 );
               },
               child: Text(
@@ -133,24 +161,16 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
           ),
         ],
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search Bar
             TextField(
               controller: searchController,
               onChanged: searchRecipes,
-              onTap: () {
-                // Clear the prewritten search text when tapped
-                if (searchController.text == 'Search Recipes') {
-                  searchController.clear();
-                }
-              },
               decoration: InputDecoration(
-
+                hintText: 'Search Recipes',
                 prefixIcon: Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
@@ -161,17 +181,51 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
               ),
             ),
             const SizedBox(height: 20),
-            // Loading Indicator
-            if (isLoading)
-              Center(child: CircularProgressIndicator())
-            else if (filteredRecipes.isEmpty)
-              Center(child: Text('No recipes found')),
-            // Recipe Cards with Infinite Scroll
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: categories.map((category) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          selectedCategory = category;
+                          page = 1;
+                          fetchRecipes();
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: selectedCategory == category
+                            ? Colors.brown[300]
+                            : Colors.brown,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: Text(
+                        category,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 20),
             Expanded(
-              child: NotificationListener<ScrollNotification>(
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : filteredRecipes.isEmpty
+                  ? Center(child: Text('No recipes found'))
+                  : NotificationListener<ScrollNotification>(
                 onNotification: (scrollInfo) {
                   if (!isFetchingMore &&
-                      scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+                      scrollInfo.metrics.pixels ==
+                          scrollInfo.metrics.maxScrollExtent) {
                     loadMoreRecipes();
                     return true;
                   }
@@ -179,7 +233,8 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
                 },
                 child: GridView.builder(
                   physics: BouncingScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
@@ -187,17 +242,16 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
                   itemCount: filteredRecipes.length,
                   itemBuilder: (context, index) {
                     final recipe = filteredRecipes[index];
-
-                    // Dynamically adjust card height based on recipe name length
-                    double cardHeight = (recipe['title'].length > 30) ? 100.0 : 150.0;
+                    double cardHeight =
+                    (recipe['title'].length > 30) ? 100.0 : 150.0;
 
                     return GestureDetector(
                       onTap: () {
-                        // Navigate to Recipe Detail Page
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => RecipeDetailPage(recipe: recipe), // Add your recipe detail page here
+                            builder: (context) => RecipeDetailPage(
+                                recipe: recipe),
                           ),
                         );
                       },
@@ -208,12 +262,11 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
                         elevation: 5,
                         child: Column(
                           children: [
-                            // Recipe Image
                             ClipRRect(
                               borderRadius: BorderRadius.circular(15),
                               child: Image.network(
                                 recipe['image'],
-                                height: cardHeight * 0.6,  // Adjust image size dynamically
+                                height: cardHeight * 0.6,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),
@@ -237,7 +290,6 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
                 ),
               ),
             ),
-            // Loading More Indicator
             if (isFetchingMore)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 20),
