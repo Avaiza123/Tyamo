@@ -23,8 +23,7 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
 
   final List<String> categories = [
     'All',
-    'Sweet Snacks',
-    'Main Course',
+    'Desserts',
     'Breakfast',
     'Salads',
     'Vegan',
@@ -33,8 +32,7 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
 
   final Map<String, String> categoryMapping = {
     'All': '',
-    'Sweet Snacks': 'dessert',
-    'Main Course': 'main_course',
+    'Desserts': 'dessert',
     'Breakfast': 'breakfast',
     'Salads': 'salad',
     'Vegan': 'vegan',
