@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'signup.dart'; // Import the Signup page
 import '/views/home_screen.dart'; // Import the Home screen
-import '/views/Auth/ForgotPassword.dart'; // Import the ForgotPassword screen
 
-class Login extends StatefulWidget {
-  const Login({super.key});
+class ForgotPassword extends StatefulWidget {
+  const ForgotPassword({super.key});
 
   @override
-  _LoginState createState() => _LoginState();
+  _ForgotPasswordState createState() => _ForgotPasswordState();
 }
 
-class _LoginState extends State<Login> {
+class _ForgotPasswordState extends State<ForgotPassword> {
   bool _isLoading = false; // To manage the loading state
 
-  // Function to handle login button press
-  void _onLoginPress() {
+  // Function to handle Reset Password button press
+  void _onResetPasswordPress() {
     setState(() {
       _isLoading = true; // Show loading spinner
     });
@@ -32,12 +30,13 @@ class _LoginState extends State<Login> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text("Success"),
-            content: const Text("You are logged in successfully!"),
+            content: const Text("A password reset link has been sent to your email!"),
             actions: <Widget>[
               TextButton(
                 child: const Text("OK"),
                 onPressed: () {
                   Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Go back to login screen
                 },
               ),
             ],
@@ -110,7 +109,7 @@ class _LoginState extends State<Login> {
                     ],
                   ),
                 ),
-                // Form content goes here
+                // Forgot Password content
                 Column(
                   children: [
                     const SizedBox(height: 18),
@@ -122,9 +121,9 @@ class _LoginState extends State<Login> {
                           child: Image.asset("assets/logo.png"),
                         ),
                         Text(
-                          "  Login ",
+                          "  Forgot Password ",
                           style: GoogleFonts.poppins(
-                            fontSize: 30,
+                            fontSize: 25,
                             color: const Color(0xB3FFFFFF),
                             fontWeight: FontWeight.bold,
                           ),
@@ -134,7 +133,7 @@ class _LoginState extends State<Login> {
                   ],
                 ),
                 const SizedBox(height: 20),
-                // Email TextField
+                // Email TextField for Forgot Password
                 TextField(
                   textAlign: TextAlign.start,
                   keyboardType: TextInputType.emailAddress,
@@ -157,32 +156,9 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Password TextField
-                TextField(
-                  textAlign: TextAlign.start,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    fillColor: Colors.white30,
-                    filled: true,
-                    prefixIcon: const Icon(
-                      Icons.password_sharp,
-                      size: 18,
-                    ),
-                    prefixIconColor: const Color(0xff00205c),
-                    label: Text(
-                      "Password",
-                      style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Login Button
+                // Reset Password Button
                 ElevatedButton(
-                  onPressed: _onLoginPress,
+                  onPressed: _onResetPasswordPress,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.brown, // Match the HomeScreen button color
                     padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
@@ -193,67 +169,13 @@ class _LoginState extends State<Login> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : Text(
-                    "Login",
+                    "Reset Password",
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                // Signup Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account?",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: const Color(0xB3FFFFFF),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Signup()),
-                        );
-                      },
-                      child: Text(
-                        "Sign Up",
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                // Forgot Password Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ForgotPassword()),
-                        );
-                      },
-                      child: Text(
-                        "Forgot Password?",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'explore_recipes_page.dart'; // Import the ExploreRecipesPage
 import 'auth/login.dart';
+import 'create_recipe.dart'; // Import the CreateRecipePage
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -16,6 +18,7 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.only(right: 20),
             child: TextButton(
               onPressed: () {
+                // Navigate to login page
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const Login()),
@@ -48,7 +51,7 @@ class HomeScreen extends StatelessWidget {
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage("assets/recipe-background.jpeg"),
-                fit: BoxFit.fill,
+                fit: BoxFit.cover, // Use 'BoxFit.cover' for a better fit on large screens
               ),
             ),
           ),
@@ -91,10 +94,9 @@ class HomeScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 30),
-                  // Explore Button
+                  // Explore Recipes Button
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to the ExploreRecipesPage
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -104,14 +106,40 @@ class HomeScreen extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.brown,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 15),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
                     child: Text(
                       "Explore Recipes",
+                      style: GoogleFonts.poppins(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Create Recipe Button
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateRecipe(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    child: Text(
+                      "Create Recipe",
                       style: GoogleFonts.poppins(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
