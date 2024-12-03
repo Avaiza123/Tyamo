@@ -86,12 +86,23 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 // Transparent AppBar as part of Stack
                 SafeArea(
                   child: AppBar(
-                    title: Text(
-                      "Flavamo",
-                      style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold, fontSize: 30, color: const Color(0xB3FFFFFF)),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Logo Image on the left
+                        Container(
+                          width: 50, // Adjust the width as necessary
+                          height: 50, // Adjust the height as necessary
+                          child: Image.asset("assets/logo.png"), // Replace with your logo path
+                        ),
+                        const SizedBox(width: 10), // Space between logo and text
+                        Text(
+                          "Flavamo",
+                          style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold, fontSize: 33, color: const Color(0xB3FFFFFF)),
+                        ),
+                      ],
                     ),
-                    centerTitle: true,
                     backgroundColor: Colors.transparent, // Transparent AppBar
                     elevation: 0, // Remove shadow
                     actions: [
@@ -112,14 +123,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 // Forgot Password content
                 Column(
                   children: [
-                    const SizedBox(height: 18),
+                    const SizedBox(height: 38),
                     Row(
                       children: [
-                        Container(
-                          width: 90,
-                          height: 90,
-                          child: Image.asset("assets/logo.png"),
-                        ),
+
                         Text(
                           "  Forgot Password ",
                           style: GoogleFonts.poppins(
@@ -132,7 +139,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height:40),
                 // Email TextField for Forgot Password
                 TextField(
                   textAlign: TextAlign.start,
@@ -155,7 +162,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 30),
                 // Reset Password Button
                 ElevatedButton(
                   onPressed: _onResetPasswordPress,

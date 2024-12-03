@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "74140252361",
-    "project_id": "flavamo-26183",
-    "storage_bucket": "flavamo-26183.firebasestorage.app"
+    "project_number": "353230136867",
+    "project_id": "recipegenerator-d5e36",
+    "storage_bucket": "recipegenerator-d5e36.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:74140252361:android:44a24b264b9f7695753518",
+        "mobilesdk_app_id": "1:353230136867:android:98e623afe8ed6370543396",
         "android_client_info": {
           "package_name": "com.example.tyamo"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBI6CCCezMTVSd8DbNJNgwe3Jjmwr2cVwE"
+          "current_key": "AIzaSyCtI5eF8yzWhLN7uAf1DDJBdAF71Q5HB_4"
         }
       ],
       "services": {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tyamo/Views/home_screen.dart';
-import 'login.dart'; // Import the Login page
+import 'package:firebase_auth/firebase_auth.dart';
+import '/user_auth/firebase_auth_implementation/firebase_auth_service.dart'; // Import FirebaseAuthService
+import '/views/home_screen.dart';
+import 'login.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -11,45 +13,110 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  bool _isLoading = false; // To manage the loading state
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
 
-  // Function to handle signup button press
-  void _onSignupPress() {
-    setState(() {
-      _isLoading = true; // Show loading spinner
-    });
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
-    // Simulating a network request with a delay
-    Future.delayed(const Duration(seconds: 2), () {
+  // Email and password validation
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email is required';
+    }
+    final emailRegExp = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegExp.hasMatch(value)) {
+      return 'Enter a valid email';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  // Handle signup button press
+  void _onSignupPress() async {
+    if (_formKey.currentState?.validate() ?? false) {
       setState(() {
-        _isLoading = false; // Hide loading spinner after 2 seconds
+        _isLoading = true;
       });
 
-      // Display a popup after the operation is complete
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Success"),
-            content: const Text("Your account has been created successfully!"),
-            actions: <Widget>[
-              TextButton(
-                child: const Text("OK"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    });
+      try {
+        final authService = FirebaseAuthService();
+        await authService.signUpWithEmailPassword(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Show success dialog and navigate to HomeScreen
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Success"),
+              content: const Text("Your account has been created successfully!"),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text("OK"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    );
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Show error dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Error"),
+              content: Text(e.toString()),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text("OK"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Background Image and overlay
       body: Stack(
         children: [
           // Background Image
@@ -58,12 +125,12 @@ class _SignupState extends State<Signup> {
             height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/recipe-background1.jpg"), // Update with your image path
-                fit: BoxFit.fill,
+                image: AssetImage("assets/recipe-background1.jpg"),
+                fit: BoxFit.cover,
               ),
             ),
           ),
-          // Content Overlay to darken the background
+          // Content Overlay
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -78,159 +145,154 @@ class _SignupState extends State<Signup> {
               ),
             ),
           ),
-          // Main content
+          // Main Content
           Padding(
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.all(18),
             child: Column(
               children: [
-                // Transparent AppBar as part of Stack
                 SafeArea(
                   child: AppBar(
-                    title: Text(
-                      "Flavamo",
-                      style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold, fontSize: 30, color: const Color(0xB3FFFFFF)),
-                    ),
-                    centerTitle: true,
-                    backgroundColor: Colors.transparent, // Transparent AppBar
-                    elevation: 0, // Remove shadow
-                    actions: [
-                      IconButton(
-                        icon: const Icon(Icons.home,
-                          size: 34,
-                          color: Colors.white,),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => const HomeScreen()),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                // Form content goes here
-                Column(
-                  children: [
-                    const SizedBox(height:20),
-                    Row(
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 80,
-                          height: 80,
-                          child: Image.asset("assets/logo.png"), // Logo
+                          width: 50,
+                          height: 50,
+                          child: Image.asset("assets/logo.png"),
                         ),
+                        const SizedBox(width: 10),
                         Text(
-                          " Sign up ",
+                          "Flavamo",
                           style: GoogleFonts.poppins(
-                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 33,
+                            color: const Color(0xB3FFFFFF),
+                          ),
+                        ),
+                      ],
+                    ),
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                  ),
+                ),
+                Column(
+                  children: [
+                    const SizedBox(height: 30),
+                    Row(
+                      children: [
+                        Text(
+                          "  Let's Sign up!",
+                          style: GoogleFonts.poppins(
+                            fontSize: 28,
                             color: const Color(0xB3FFFFFF),
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-
                   ],
                 ),
-                const SizedBox(height: 20),
-                // Email TextField
-                TextField(
-                  textAlign: TextAlign.start,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    fillColor: Colors.white30,
-                    filled: true,
-                    prefixIcon: const Icon(
-                      Icons.alternate_email_sharp,
-                      size: 18,
-                    ),
-                    prefixIconColor: const Color(0xff00205c),
-                    label: Text(
-                      "Email",
-                      style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 25),
-                // Password TextField
-                TextField(
-                  textAlign: TextAlign.start,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    fillColor: Colors.white30,
-                    filled: true,
-                    prefixIcon: const Icon(
-                      Icons.password_sharp,
-                      size: 18,
-                    ),
-                    prefixIconColor: const Color(0xff00205c),
-                    label: Text(
-                      "Password",
-                      style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Sign Up Button
-                ElevatedButton(
-                  onPressed: _onSignupPress,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown, // Match the HomeScreen button color
-                    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                    "Sign Up",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Login Link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Already have an account?",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: const Color(0xB3FFFFFF),
-                        fontWeight: FontWeight.bold,
+                const SizedBox(height: 35),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      // Email TextField
+                      TextFormField(
+                        controller: _emailController,
+                        textAlign: TextAlign.start,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          fillColor: Colors.white30,
+                          filled: true,
+                          prefixIcon: const Icon(Icons.alternate_email_sharp, size: 18),
+                          label: Text(
+                            "Email",
+                            style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        validator: _validateEmail,
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Login()),
-                        );
-                      },
-                      child: Text(
-                        "Login",
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          color:Colors.white,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(height: 25),
+                      // Password TextField
+                      TextFormField(
+                        controller: _passwordController,
+                        textAlign: TextAlign.start,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          fillColor: Colors.white30,
+                          filled: true,
+                          prefixIcon: const Icon(Icons.password_sharp, size: 18),
+                          label: Text(
+                            "Password",
+                            style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        validator: _validatePassword,
+                      ),
+                      const SizedBox(height: 20),
+                      // Sign Up Button
+                      ElevatedButton(
+                        onPressed: _isLoading ? null : _onSignupPress,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.brown,
+                          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : Text(
+                          "Sign Up",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 20),
+                      // Login Link
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Already have an account?",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: const Color(0xB3FFFFFF),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const Login()),
+                              );
+                            },
+                            child: Text(
+                              "Login",
+                              style: GoogleFonts.poppins(
+                                fontSize: 20,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),

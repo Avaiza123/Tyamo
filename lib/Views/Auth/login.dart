@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'signup.dart'; // Import the Signup page
-import '/views/home_screen.dart'; // Import the Home screen
-import '/views/Auth/ForgotPassword.dart'; // Import the ForgotPassword screen
+import 'signup.dart';
+import '/views/home_screen.dart';
+import '/views/Auth/ForgotPassword.dart';
+import '/user_auth/firebase_auth_implementation/firebase_auth_service.dart'; // Import FirebaseAuthService
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -12,45 +13,71 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  bool _isLoading = false; // To manage the loading state
+  final FirebaseAuthService _authService = FirebaseAuthService();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   // Function to handle login button press
-  void _onLoginPress() {
+  Future<void> _onLoginPress() async {
     setState(() {
-      _isLoading = true; // Show loading spinner
+      _isLoading = true;
     });
 
-    // Simulating a network request with a delay
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _isLoading = false; // Hide loading spinner after 2 seconds
-      });
-
-      // Display a popup after the operation is complete
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Success"),
-            content: const Text("You are logged in successfully!"),
-            actions: <Widget>[
-              TextButton(
-                child: const Text("OK"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
+    try {
+      final user = await _authService.signInWithEmailPassword(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
-    });
+
+      if (user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        _showErrorDialog("Login failed. Please try again.");
+      }
+    } catch (e) {
+      _showErrorDialog(e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Function to show error dialog
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Error"),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // No AppBar in Scaffold to ensure the transparent one is used
       body: Stack(
         children: [
           // Background Image
@@ -59,12 +86,12 @@ class _LoginState extends State<Login> {
             height: double.infinity,
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/recipe-background1.jpg"), // Replace with your background image path
+                image: AssetImage("assets/recipe-background1.jpg"),
                 fit: BoxFit.fill,
               ),
             ),
           ),
-          // Content Overlay to darken the background
+          // Content Overlay
           Container(
             width: double.infinity,
             height: double.infinity,
@@ -84,22 +111,29 @@ class _LoginState extends State<Login> {
             padding: const EdgeInsets.all(18),
             child: Column(
               children: [
-                // Transparent AppBar as part of Stack
                 SafeArea(
                   child: AppBar(
-                    title: Text(
-                      "Flavamo",
-                      style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold, fontSize: 30, color: const Color(0xB3FFFFFF)),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 50,
+                          child: Image.asset("assets/logo.png"),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Flavamo",
+                          style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold, fontSize: 33, color: const Color(0xB3FFFFFF)),
+                        ),
+                      ],
                     ),
-                    centerTitle: true,
-                    backgroundColor: Colors.transparent, // Transparent AppBar
-                    elevation: 0, // Remove shadow
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
                     actions: [
                       IconButton(
-                        icon: const Icon(Icons.home,
-                            size: 34,
-                            color: Colors.white),
+                        icon: const Icon(Icons.home, size: 34, color: Colors.white),
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
@@ -110,42 +144,28 @@ class _LoginState extends State<Login> {
                     ],
                   ),
                 ),
-                // Form content goes here
-                Column(
+                const SizedBox(height: 25),
+                Row(
                   children: [
-                    const SizedBox(height: 18),
-                    Row(
-                      children: [
-                        Container(
-                          width: 90,
-                          height: 90,
-                          child: Image.asset("assets/logo.png"),
-                        ),
-                        Text(
-                          "  Login ",
-                          style: GoogleFonts.poppins(
-                            fontSize: 30,
-                            color: const Color(0xB3FFFFFF),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      "   Let's Login!",
+                      style: GoogleFonts.poppins(
+                        fontSize: 32,
+                        color: const Color(0xB3FFFFFF),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                // Email TextField
+                const SizedBox(height: 35),
                 TextField(
+                  controller: _emailController,
                   textAlign: TextAlign.start,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
                     fillColor: Colors.white30,
                     filled: true,
-                    prefixIcon: const Icon(
-                      Icons.alternate_email_sharp,
-                      size: 18,
-                    ),
-                    prefixIconColor: const Color(0xff00205c),
+                    prefixIcon: const Icon(Icons.alternate_email_sharp, size: 18),
                     label: Text(
                       "Email",
                       style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
@@ -157,18 +177,14 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Password TextField
                 TextField(
+                  controller: _passwordController,
                   textAlign: TextAlign.start,
                   obscureText: true,
                   decoration: InputDecoration(
                     fillColor: Colors.white30,
                     filled: true,
-                    prefixIcon: const Icon(
-                      Icons.password_sharp,
-                      size: 18,
-                    ),
-                    prefixIconColor: const Color(0xff00205c),
+                    prefixIcon: const Icon(Icons.password_sharp, size: 18),
                     label: Text(
                       "Password",
                       style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
@@ -180,11 +196,10 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Login Button
                 ElevatedButton(
-                  onPressed: _onLoginPress,
+                  onPressed: _isLoading ? null : _onLoginPress,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown, // Match the HomeScreen button color
+                    backgroundColor: Colors.brown,
                     padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -202,17 +217,12 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Signup Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "Don't have an account?",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: const Color(0xB3FFFFFF),
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: GoogleFonts.poppins(fontSize: 16, color: const Color(0xB3FFFFFF)),
                     ),
                     TextButton(
                       onPressed: () {
@@ -223,17 +233,11 @@ class _LoginState extends State<Login> {
                       },
                       child: Text(
                         "Sign Up",
-                        style: GoogleFonts.poppins(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: GoogleFonts.poppins(fontSize: 20, color: Colors.white),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
-                // Forgot Password Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -246,11 +250,7 @@ class _LoginState extends State<Login> {
                       },
                       child: Text(
                         "Forgot Password?",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: GoogleFonts.poppins(fontSize: 18, color: Colors.white),
                       ),
                     ),
                   ],
