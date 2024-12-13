@@ -6,7 +6,12 @@ import 'views/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: FirebaseOptions(apiKey: "AIzaSyCtI5eF8yzWhLN7uAf1DDJBdAF71Q5HB_4", appId: "1:353230136867:android:98e623afe8ed6370543396", messagingSenderId: "353230136867", projectId: "recipegenerator-d5e36")); // Initialize Firebase
+  await Firebase.initializeApp(options: FirebaseOptions(
+    apiKey: "AIzaSyCtI5eF8yzWhLN7uAf1DDJBdAF71Q5HB_4",
+    appId: "1:353230136867:android:98e623afe8ed6370543396",
+    messagingSenderId: "353230136867",
+    projectId: "recipegenerator-d5e36",
+  )); // Initialize Firebase
   runApp(const Tyamo());
 }
 
@@ -21,7 +26,7 @@ class Tyamo extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.orange,
       ),
-      home: const InitialScreen(),
+      home: const HomeScreen(),  // Start the app directly with HomeScreen
     );
   }
 }
