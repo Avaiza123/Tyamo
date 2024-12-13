@@ -108,13 +108,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: CircleAvatar(
                 backgroundColor: Colors.brown,
                 child: Text(
-                  (_user!.displayName ?? _user!.email ?? 'U')[0].toUpperCase(),
+                  (_user != null && (_user!.displayName != null && _user!.displayName!.isNotEmpty)
+                      ? _user!.displayName![0]
+                      : (_user!.email != null && _user!.email!.isNotEmpty)
+                      ? _user!.email![0]
+                      : 'U').toUpperCase(),
                   style: GoogleFonts.poppins(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
+
               ),
             )
                 : TextButton(

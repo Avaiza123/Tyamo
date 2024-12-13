@@ -16,9 +16,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   User? _user;
   String? _name, _age, _gender, _email, _phone, _country, _city;
+  bool isLoading = false;
+  bool _isEditing = false;
 
   final _formKey = GlobalKey<FormState>();
-  bool _isEditing = false;
 
   @override
   void initState() {
@@ -30,17 +31,36 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _loadUserData() async {
     if (_user != null) {
-      DocumentSnapshot userDoc =
-      await _firestore.collection('users').doc(_user!.uid).get();
+      setState(() {
+        isLoading = true; // Start loading
+      });
 
-      if (userDoc.exists) {
+      try {
+        // Fetch user document from Firestore's 'profiles' collection
+        DocumentSnapshot userDoc =
+        await _firestore.collection('profiles').doc(_user!.uid).get();
+
+        if (userDoc.exists) {
+          setState(() {
+            _name = userDoc['name'];
+            _age = userDoc['age'];
+            _gender = userDoc['gender'];
+            _phone = userDoc['phone'];
+            _country = userDoc['country'];
+            _city = userDoc['city'];
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User profile not found.')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading profile: $e')),
+        );
+      } finally {
         setState(() {
-          _name = userDoc['name'];
-          _age = userDoc['age'];
-          _gender = userDoc['gender'];
-          _phone = userDoc['phone'];
-          _country = userDoc['country'];
-          _city = userDoc['city'];
+          isLoading = false; // Stop loading
         });
       }
     }
@@ -48,35 +68,36 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _saveProfileData() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+
       _formKey.currentState!.save();
 
-      // Save or update profile data in Firestore
-      await _firestore.collection('profiles').doc(_user!.uid).set({
-        'name': _name,
-        'age': _age,
-        'gender': _gender,
-        'phone': _phone,
-        'country': _country,
-        'city': _city,
-      }, SetOptions(merge: true));
+      try {
+        // Update the document in Firestore
+        await _firestore.collection('profiles').doc(_user!.uid).set({
+          'name': _name,
+          'age': _age,
+          'gender': _gender,
+          'phone': _phone,
+          'country': _country,
+          'city': _city,
+        });
 
-      // Save to 'users' collection as well (optional, based on your need)
-      await _firestore.collection('users').doc(_user!.uid).update({
-        'name': _name,
-        'age': _age,
-        'gender': _gender,
-        'phone': _phone,
-        'country': _country,
-        'city': _city,
-      });
-
-      setState(() {
-        _isEditing = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully!')),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving profile: $e')),
+        );
+      } finally {
+        setState(() {
+          isLoading = false;
+          _isEditing = false;
+        });
+      }
     }
   }
 
@@ -124,7 +145,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-          // Content Overlay
+          // Gradient Overlay
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -138,7 +159,9 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
           // Profile Form
-          SingleChildScrollView(
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(30.0),
               child: Column(
@@ -213,7 +236,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               ElevatedButton(
-                                onPressed: _saveProfileData, // Save Profile
+                                onPressed: _saveProfileData,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.brown,
                                   padding: const EdgeInsets.symmetric(
@@ -296,9 +319,9 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   // Custom read-only text field widget for email
-  Widget _buildReadOnlyField(String label, String? value) {
+  Widget _buildReadOnlyField(String label, String? initialValue) {
     return TextFormField(
-      initialValue: value,
+      initialValue: initialValue,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.poppins(color: Colors.white),
@@ -310,7 +333,7 @@ class _ProfilePageState extends State<ProfilePage> {
         fillColor: Colors.white.withOpacity(0.3),
       ),
       style: GoogleFonts.poppins(color: Colors.white),
-      enabled: false, // Makes this field read-only
+      enabled: false,
     );
   }
 }

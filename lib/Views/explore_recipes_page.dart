@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'auth/login.dart';
 import 'RecipeDetailPage.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Authentication
 
 class ExploreRecipesPage extends StatefulWidget {
   const ExploreRecipesPage({Key? key}) : super(key: key);
@@ -20,6 +21,8 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
   int page = 1;
   TextEditingController searchController = TextEditingController();
   String selectedCategory = 'All';
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? _user;
 
   final List<String> categories = [
     'All',
@@ -42,8 +45,22 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
   @override
   void initState() {
     super.initState();
+    _user = _auth.currentUser;
+    _auth.authStateChanges().listen((User? user) {
+      setState(() {
+        _user = user;
+      });
+    });
     fetchRecipes();
     fetchFoodTriviaOrJokes();
+  }
+
+  void _signOut() async {
+    await _auth.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const Login()),
+    );
   }
 
   Future<void> fetchRecipes({bool isLoadMore = false}) async {
@@ -57,7 +74,7 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
 
     final categoryTag = categoryMapping[selectedCategory] ?? '';
     final url =
-        'https://api.spoonacular.com/recipes/random?number=10&tags=$categoryTag&apiKey=dce8d048d70445279c7b81ff5a99708e';
+        'https://api.spoonacular.com/recipes/random?number=10&tags=$categoryTag&apiKey=b2b2e85e15ce49e1bc2e0d152bdda1ad';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -87,9 +104,9 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
 
   Future<void> fetchFoodTriviaOrJokes() async {
     final jokeUrl =
-        'https://api.spoonacular.com/food/jokes/random?apiKey=dce8d048d70445279c7b81ff5a99708e';
+        'https://api.spoonacular.com/food/jokes/random?apiKey=b2b2e85e15ce49e1bc2e0d152bdda1ad';
     final triviaUrl =
-        'https://api.spoonacular.com/food/trivia/random?apiKey=dce8d048d70445279c7b81ff5a99708e';
+        'https://api.spoonacular.com/food/trivia/random?apiKey=b2b2e85e15ce49e1bc2e0d152bdda1ad';
 
     try {
       final jokeResponse = await http.get(Uri.parse(jokeUrl));
@@ -106,66 +123,62 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           showDialog(
             context: context,
-            barrierDismissible: false, // Prevent closing by tapping outside
+            barrierDismissible: false,
             builder: (BuildContext context) {
               return Dialog(
-                insetPadding: EdgeInsets.all(15),
+                insetPadding: const EdgeInsets.all(15),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: AnimatedOpacity(
-                  opacity: 1.0,
-                  duration: Duration(seconds: 1),
-                  child: Container(
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.transparent.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Did You Know?',
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.brown,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Did You Know?',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        randomContent,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                          'Close',
                           style: GoogleFonts.poppins(
+                            color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          randomContent,
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 20),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(
-                            'Close',
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.brown,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 25, vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
                           ),
                         ),
-                      ],
-                    ),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.brown[800],
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 25, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -177,7 +190,6 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
       print('Error fetching trivia or jokes: $e');
     }
   }
-
 
   void searchRecipes(String query) {
     final filtered = recipes.where((recipe) {
@@ -213,11 +225,11 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/logo.png', // Replace with your image path
-              height: 50, // Adjust the height of the image
-              width: 50,  // Adjust the width of the image
+              'assets/logo.png',
+              height: 50,
+              width: 50,
             ),
-            const SizedBox(width: 10), // Space between the image and the text
+            const SizedBox(width: 10),
             Text(
               'Flavamo',
               style: GoogleFonts.poppins(
@@ -236,8 +248,48 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 10),
-            child: TextButton(
+            padding: const EdgeInsets.only(right: 20),
+            child: _user != null
+                ? PopupMenuButton<String>(
+              onSelected: (value) {
+                if (value == 'Profile') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const Login()),
+                  );
+                } else if (value == 'Logout') {
+                  _signOut();
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem<String>(
+                  value: 'Profile',
+                  child: ListTile(
+                    leading: const Icon(Icons.account_circle),
+                    title: const Text('Profile'),
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'Logout',
+                  child: ListTile(
+                    leading: const Icon(Icons.exit_to_app),
+                    title: const Text('Logout'),
+                  ),
+                ),
+              ],
+              child: CircleAvatar(
+                backgroundColor: Colors.brown[900],
+                child: _user?.email != null
+                    ? Text(
+                  _user!.email![0].toUpperCase(),
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                )
+                    : const Icon(Icons.person, color: Colors.white),
+              ),
+
+            )
+                : TextButton(
               onPressed: () {
                 Navigator.push(
                   context,
@@ -254,7 +306,8 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
               ),
               style: TextButton.styleFrom(
                 backgroundColor: Colors.brown,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 20, vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -263,7 +316,6 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
           ),
         ],
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -363,10 +415,11 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.only(
+                              borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(15),
                                 topRight: Radius.circular(15),
                               ),
