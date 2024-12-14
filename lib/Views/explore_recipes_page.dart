@@ -126,61 +126,62 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
             barrierDismissible: false,
             builder: (BuildContext context) {
               return Dialog(
-                insetPadding: const EdgeInsets.all(15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.brown,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Did You Know?',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        randomContent,
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 20),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text(
-                          'Close',
-                          style: GoogleFonts.poppins(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.brown[800],
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 25, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                  insetPadding: const EdgeInsets.all(15),
+              shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+              color: Colors.brown,
+              borderRadius: BorderRadius.circular(20),
+              ),
+              child: SingleChildScrollView( // Add this to make the content scrollable
+              child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+              Text(
+              'Did You Know?',
+              style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+              randomContent, // Your content here
+              style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              TextButton(
+              onPressed: () {
+              Navigator.of(context).pop();
+              },
+              child: Text(
+              'Close',
+              style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              ),
+              ),
+              style: TextButton.styleFrom(
+              backgroundColor: Colors.brown[800],
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
+              shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
+              ),
               );
             },
           );
@@ -425,7 +426,7 @@ class _ExploreRecipesPageState extends State<ExploreRecipesPage> {
                               ),
                               child: Image.network(
                                 recipe['image'],
-                                height: 120,
+                                height: 100,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
                               ),

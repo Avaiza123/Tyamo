@@ -109,153 +109,155 @@ class _LoginState extends State<Login> {
           // Main content
           Padding(
             padding: const EdgeInsets.all(18),
-            child: Column(
-              children: [
-                SafeArea(
-                  child: AppBar(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          child: Image.asset("assets/logo.png"),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          "Flavamo",
-                          style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold, fontSize: 33, color: const Color(0xB3FFFFFF)),
+            child: SingleChildScrollView(  // Add SingleChildScrollView to make the content scrollable
+              child: Column(
+                children: [
+                  SafeArea(
+                    child: AppBar(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 50,
+                            child: Image.asset("assets/logo.png"),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            "Flavamo",
+                            style: GoogleFonts.poppins(
+                                fontWeight: FontWeight.bold, fontSize: 25, color: const Color(0xB3FFFFFF)),
+                          ),
+                        ],
+                      ),
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      actions: [
+                        IconButton(
+                          icon: const Icon(Icons.home, size: 34, color: Colors.white),
+                          onPressed: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const HomeScreen()),
+                            );
+                          },
                         ),
                       ],
                     ),
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    actions: [
-                      IconButton(
-                        icon: const Icon(Icons.home, size: 34, color: Colors.white),
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => const HomeScreen()),
-                          );
-                        },
+                  ),
+                  const SizedBox(height: 25),
+                  Row(
+                    children: [
+                      Text(
+                        "   Let's Login!",
+                        style: GoogleFonts.poppins(
+                          fontSize: 32,
+                          color: const Color(0xB3FFFFFF),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 25),
-                Row(
-                  children: [
-                    Text(
-                      "   Let's Login!",
+                  const SizedBox(height: 35),
+                  TextField(
+                    controller: _emailController,
+                    textAlign: TextAlign.start,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      fillColor: Colors.white30,
+                      filled: true,
+                      prefixIcon: const Icon(Icons.alternate_email_sharp, size: 18),
+                      label: Text(
+                        "Email",
+                        style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _passwordController,
+                    textAlign: TextAlign.start,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      fillColor: Colors.white30,
+                      filled: true,
+                      prefixIcon: const Icon(Icons.password_sharp, size: 18),
+                      label: Text(
+                        "Password",
+                        style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _isLoading ? null : _onLoginPress,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                      "Login",
                       style: GoogleFonts.poppins(
-                        fontSize: 32,
-                        color: const Color(0xB3FFFFFF),
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 35),
-                TextField(
-                  controller: _emailController,
-                  textAlign: TextAlign.start,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    fillColor: Colors.white30,
-                    filled: true,
-                    prefixIcon: const Icon(Icons.alternate_email_sharp, size: 18),
-                    label: Text(
-                      "Email",
-                      style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _passwordController,
-                  textAlign: TextAlign.start,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    fillColor: Colors.white30,
-                    filled: true,
-                    prefixIcon: const Icon(Icons.password_sharp, size: 18),
-                    label: Text(
-                      "Password",
-                      style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _onLoginPress,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown,
-                    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : Text(
-                    "Login",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Don't have an account?",
-                      style: GoogleFonts.poppins(fontSize: 16, color: const Color(0xB3FFFFFF)),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Signup()),
-                        );
-                      },
-                      child: Text(
-                        "Sign Up",
-                        style: GoogleFonts.poppins(fontSize: 20, color: Colors.white),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Don't have an account?",
+                        style: GoogleFonts.poppins(fontSize: 16, color: const Color(0xB3FFFFFF)),
                       ),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ForgotPassword()),
-                        );
-                      },
-                      child: Text(
-                        "Forgot Password?",
-                        style: GoogleFonts.poppins(fontSize: 18, color: Colors.white),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const Signup()),
+                          );
+                        },
+                        child: Text(
+                          "Sign Up",
+                          style: GoogleFonts.poppins(fontSize: 20, color: Colors.white),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ForgotPassword()),
+                          );
+                        },
+                        child: Text(
+                          "Forgot Password?",
+                          style: GoogleFonts.poppins(fontSize: 18, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

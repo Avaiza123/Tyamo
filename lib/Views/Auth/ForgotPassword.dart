@@ -99,7 +99,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         Text(
                           "Flavamo",
                           style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.bold, fontSize: 33, color: const Color(0xB3FFFFFF)),
+                              fontWeight: FontWeight.bold, fontSize: 25, color: const Color(0xB3FFFFFF)),
                         ),
                       ],
                     ),
